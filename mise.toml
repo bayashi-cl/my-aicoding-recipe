@@ -1,0 +1,7 @@
+[tools]
+uv = "latest"
+pnpm = "latest"
+# Node は mise の npm バックエンドが必要とするため、また claude-code (Node アプリ) の実行に必要なため導入。
+# プロジェクトの Node ランタイム（apps/web）は pnpm の devEngines.runtime で別管理する方針は維持する。
+node = "lts"
+"npm:@anthropic-ai/claude-code" = "latest"
