@@ -178,7 +178,7 @@ $HOME/.claude-worktrees/
 ```
 
 - **1 つの DevContainer 内に複数 worktree を持つ**。worktree ごとに DevContainer を立てる構成は採らない (起動時間・キャッシュ重複・ポート/.env の二重管理コストが PoC のメリットを上回るため)
-- **worktree は `$HOME/.claude-worktrees/<name>/` (overlay FS) に置く**。リポジトリは host bind mount で別 FS のため、repo 内に worktree を作ると pnpm/uv の hardlink キャッシュ最適化が壊れて遅くなる。overlay FS 上ならキャッシュ (`~/.cache/pnpm`, `~/.cache/uv` 等) と同 FS なので hardlink が成立
+- **worktree は `$HOME/.claude-worktrees/<name>/` (overlay FS) に置く**。リポジトリは host bind mount で別 FS のため、repo 内に worktree を作ると pnpm/uv の hardlink キャッシュ最適化が壊れて遅くなる。overlay FS 上ならキャッシュ (`~/.local/share/pnpm/store`, `~/.cache/uv` 等) と同 FS なので hardlink が成立
 - worktree 作成は `claude --worktree <type>-<topic>` 形式で呼ぶ。`.claude/hooks/worktree-create.sh` (WorktreeCreate hook) がブランチ名を `<type>/<topic>` に正規化し、`$HOME/.claude-worktrees/<type>-<topic>/` を作る
 - `.env` / `.env.local` は同 hook が新規 worktree に自動コピー (`.worktreeinclude` ではなく hook 内で処理。hook が使われると `.worktreeinclude` は無効化されるため)
 - worktree の場所は overlay FS なので、DevContainer をリビルドすると消える。作業中の worktree はリビルド前にコミット/プッシュしておくこと
@@ -369,7 +369,6 @@ typescript/mar-infra/
 
 - `/ultrareview` 等の有償機能をどの頻度で使うかのコスト感
 - Cloud Agentへの具体的なhandoff手順（運用しながら整理）
-- WORKTREES.md の自動更新スクリプトを書くかどうか
 - memoryに溜める基準（書きすぎると劣化するため、運用ルールが必要）
 
 ## 8. 変更履歴（設計判断の更新）
