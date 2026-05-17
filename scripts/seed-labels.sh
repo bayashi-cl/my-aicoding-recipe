@@ -18,7 +18,7 @@ if ! command -v gh >/dev/null 2>&1; then
 fi
 
 if ! gh auth status >/dev/null 2>&1; then
-  echo "error: gh が未認証。`gh auth login` を先に実行してください。" >&2
+  echo 'error: gh が未認証。`gh auth login` を先に実行してください。' >&2
   exit 1
 fi
 
