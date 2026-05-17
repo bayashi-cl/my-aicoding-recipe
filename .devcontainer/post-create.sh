@@ -45,5 +45,5 @@ Dev Container setup complete.
 Next steps:
   - DB (db service) is already running via docker-compose (workspace depends_on db).
   - Run the API:          uv run --package mar-api uvicorn mar_api.main:app --reload
-  - Smoke test:           curl localhost:8000/healthz
+  - Smoke test:           curl localhost:8000/health
 EOF

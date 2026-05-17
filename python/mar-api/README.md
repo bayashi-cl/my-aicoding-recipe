@@ -13,7 +13,7 @@ uv run --package mar-api uvicorn mar_api.main:app --reload
 確認:
 
 ```bash
-curl localhost:8000/healthz
+curl localhost:8000/health
 # => {"ok":true}
 ```
 

@@ -21,7 +21,7 @@ AI コーディングの「型」を確立するための PoC。題材として 
 3. 初回起動時に `.devcontainer/post-create.sh` が走り `mise install` まで終わる
 4. **`gh auth login`** をコンテナ内で実行（人間がやる。AI 側にトークンを渡さない）
 5. DB (`db`) は devcontainer の compose で workspace と同時に立ち上がっているため別途起動不要
-6. API を起動する場合: `uv run --package mar-api uvicorn mar_api.main:app --reload` → `curl localhost:8000/healthz`
+6. API を起動する場合: `uv run --package mar-api uvicorn mar_api.main:app --reload` → `curl localhost:8000/health`
 
 エージェント側の作業は VS Code 拡張の Claude Code から実行する。
 
