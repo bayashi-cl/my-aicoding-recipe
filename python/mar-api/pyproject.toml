@@ -1,7 +1,7 @@
 [project]
 name = "mar-api"
 version = "0.1.0"
-description = "Add your description here"
+description = "Notes アプリの FastAPI サーバ (my-aicoding-recipe の workspace member)"
 readme = "README.md"
 authors = [
     { name = "Masaki Kobayashi", email = "bayashi.cl@gmail.com" }
