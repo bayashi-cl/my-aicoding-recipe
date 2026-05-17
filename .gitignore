@@ -3,6 +3,7 @@ node_modules/
 dist/
 build/
 *.log
+.pnpm-store/
 
 # Python
 __pycache__/
