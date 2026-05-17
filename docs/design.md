@@ -70,7 +70,7 @@ my-aicoding-recipe/
 | ORM | SQLModel (or SQLAlchemy 2.0 + Alembic) | Pydanticと統合され型がはっきりする。マイグレーションはAlembic |
 | dev ツール管理 | mise | uv / pnpm / claude-code 等のバイナリ版を `mise.toml` で一元宣言 |
 | Pythonランタイム / パッケージ管理 | uv | Pythonランタイムも含めて uv が取得・管理 |
-| Node ランタイム / パッケージ管理 | pnpm + workspaces | **プロジェクトの Node** は `devEngines.runtime` で固定して `pnpm exec` / `pnpm run` 経由で実行。**グローバル CLI 用の Node**（claude-code など）は mise が管理して PATH に出ている（実環境で「Node を完全に PATH から外す」のは Node ベース CLI の実行不能を意味するため。詳細は §8 変更履歴参照） |
+| Node ランタイム / パッケージ管理 | pnpm + workspaces | **プロジェクトの Node** は web (`typescript/mar-web`) 追加時 (M3) にルート `package.json` の `devEngines.runtime` で固定し、`pnpm exec` / `pnpm run` 経由で実行する方針。**グローバル CLI 用の Node**（claude-code など）は mise が管理して PATH に出ている（実環境で「Node を完全に PATH から外す」のは Node ベース CLI の実行不能を意味するため。詳細は §8 変更履歴参照） |
 | lint / format | Biome | Rust バイナリで Node 不要。TypeScript/JSON 系を一括カバー |
 | IaC | AWS CDK (TypeScript) | 型補完が効きAIも扱いやすい。`typescript/mar-infra/` の devDependency として導入し `pnpm exec cdk` で実行 |
 | 隔離環境 | Dev Container + Docker Compose | 後述（4章） |
