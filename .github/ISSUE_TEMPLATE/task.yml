@@ -1,0 +1,39 @@
+name: Task
+description: PR 1 件分の作業単位。親 Milestone Issue から派生する。
+title: "<種別>: <短いトピック>"
+labels: ["type:task"]
+body:
+  - type: input
+    id: parent
+    attributes:
+      label: Parent Milestone
+      description: 親 Milestone Issue の番号 (例 `#2`)。
+      placeholder: "#"
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: 何をやるか (What)
+      description: コードレベルで何が変わるかを箇条書きで。
+      placeholder: |
+        - <変更点 1>
+        - <変更点 2>
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: 完了条件 (Definition of Done)
+      placeholder: |
+        - [ ] <チェック項目 1>
+        - [ ] <チェック項目 2>
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: 補足 / 設計上の注意
+      placeholder: |
+        - 参照: docs/design.md §X
+        - 触らない範囲: ...

@@ -5,6 +5,43 @@ description: ブランチ作成、worktree、コミット、PR作成など Git �
 
 # Gitワークフロー規約
 
+## Issue 駆動フロー
+
+すべての作業は GitHub Issue を起点にする（要件 A-02）。
+
+### Issue の種別
+
+| 種別 | ラベル | 用途 |
+|------|--------|------|
+| Milestone | `type:milestone` | 設計書 §6 のマイルストーン (M2〜M7 等)。複数 PR にまたがる親 Issue |
+| Task | `type:task` | PR 1 件分の作業単位。親 Milestone から派生 |
+| Bug | `type:bug` | 不具合報告 |
+
+Milestone と Task の区別は **ラベル** で取る（GitHub の Milestone 機能は使わない）。
+
+### 親子関係の表現
+
+GitHub に親子 Issue の組み込み機能はないため、慣習で取る:
+
+- **Task 本文の Parent 欄** に親 Milestone Issue 番号 (`#N`) を記載
+- **Milestone 本文のサブタスク欄** に子 Task のチェックリスト (`- [ ] #M`) を並べる
+  → `Closes #M` を含む PR をマージすると GitHub が自動でチェックを入れる
+
+### 作業開始時の手順
+
+1. 親 Milestone Issue を確認 (`gh issue view <N>`)
+2. 対応する Task Issue が無ければ起票 (`gh issue create --template task.yml`)
+3. ブランチを切る (`<type>/<short-topic>`、後述)
+4. 実装 → コミット
+5. PR を出し、本文の `Closes #<task>` で Task Issue を閉じる
+6. PR description テンプレ (`.github/PULL_REQUEST_TEMPLATE.md`) が初期表示されるので、それを埋める
+
+### gh CLI が未認証なら
+
+Issue・PR を扱う前に `gh auth login` を実行する（人間が認証。AI 側でトークンは扱わない）。
+
+---
+
 ## ブランチ運用
 
 - `main` への直接コミット禁止。すべての変更はブランチ → PR を経由する。
@@ -48,22 +85,8 @@ git worktree add ../wt-feature-search -b feat/notes-search
 
 ### PR description テンプレート
 
-```markdown
-## 関連 Issue
-- Closes #<num>
-
-## What
-- <変更点を箇条書きで3-5行>
-
-## Why
-- <なぜこの変更が必要か。背景・代替案を却下した理由>
-
-## Open Questions
-- <未確定事項。なければ「なし」>
-
-## Test plan
-- [ ] <手動確認の手順 or 通したテスト>
-```
+実体は [`.github/PULL_REQUEST_TEMPLATE.md`](../../../.github/PULL_REQUEST_TEMPLATE.md) を参照。
+PR 作成時に初期表示されるので、それを埋める。テンプレートの構造を変えたい場合は SKILL ではなくテンプレ本体を編集する（二重管理を避けるため）。
 
 ### マージ前チェック
 

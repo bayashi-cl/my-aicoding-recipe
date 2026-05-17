@@ -1,0 +1,35 @@
+name: Milestone
+description: 設計書 §6 のマイルストーン (M2〜M7 等) を表す親 Issue。配下のタスク Issue を集約する。
+title: "M?: <マイルストーン名>"
+labels: ["type:milestone"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        マイルストーンは「複数の PR にまたがる大きめのスコープ」。
+        実作業は本 Issue から派生する **Task Issue** (`type:task`) で進める。
+  - type: textarea
+    id: goal
+    attributes:
+      label: ゴール / 検証ポイント
+      description: docs/design.md §6 のマイルストーン表に書かれた「検証ポイント」をベースに、何が成立すれば完了かを記す。
+      placeholder: |
+        - <成果物 1>
+        - <成果物 2>
+        - 検証ポイント: <PoC として何を確かめたいか>
+    validations:
+      required: true
+  - type: textarea
+    id: subtasks
+    attributes:
+      label: サブタスク (Task Issue へのリンク)
+      description: 起票した子 Issue を順次追記する。チェックボックスは Issue の close と連動して GitHub が自動更新する。
+      value: |
+        - [ ] #
+  - type: textarea
+    id: related
+    attributes:
+      label: 関連ドキュメント / 補足
+      placeholder: |
+        - docs/design.md §X
+        - docs/requirements.md §Y
