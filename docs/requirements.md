@@ -111,6 +111,6 @@ PoCの「もうひとつの成果物」として、以下のAI開発環境を構
 |--------|----------|------|
 | 要件定義書 | `docs/requirements.md` | 本書 |
 | 設計書 | `docs/design.md` | アーキテクチャ・AI開発フロー・インフラ設計 |
-| アプリケーションコード | `apps/web`, `apps/api`（予定） | Notesアプリ本体 |
-| IaCコード | `infra/`（予定） | AWS CDKコード |
+| アプリケーションコード | `typescript/mar-web`, `python/mar-api`（予定） | Notesアプリ本体 |
+| IaCコード | `typescript/mar-infra/`（予定） | AWS CDKコード |
 | AI開発環境設定 | `.devcontainer/`, `CLAUDE.md`, `.claude/`（予定） | 隔離環境とAI向けの指示 |

@@ -13,25 +13,25 @@ description: コードを書く・修正するとき（TypeScript / Python / SQL
 - **エラーハンドリングを盛らない**: 起き得ないケースのフォールバックを書かない。信頼できる内部呼び出しには try/except や null チェックを足さない。境界（ユーザー入力、外部API、ファイルI/O）でだけ防御する。
 - **未使用コードを残さない**: 「あとで使うかも」のコメントアウトは削除。Gitに履歴がある。
 
-## TypeScript (apps/web, infra)
+## TypeScript (typescript/mar-web, typescript/mar-infra)
 
 - `any` 禁止。型が定まらない場合は `unknown` から narrow する。
-- API レスポンスの型は手書きせず、生成された型（`packages/schema` 配下）を import する。
+- API レスポンスの型は手書きせず、生成された型（`typescript/mar-schema/` 配下）を import する。
 - 関数の引数・戻り値には明示的な型注釈を付ける（推論に頼らない、特に公開関数）。
 - React コンポーネントは関数コンポーネント + Hooks。クラスコンポーネントは使わない。
 - 状態管理: ローカル状態は `useState`、サーバ状態は TanStack Query。Reduxや独自ストアは導入しない。
 - スタイルは Tailwind CSS のユーティリティクラスで完結させる。独自CSSファイルは原則作らない。
 
-## Python (apps/api)
+## Python (python/mar-api)
 
 - 型ヒントは常に付ける。`mypy` または `pyright` の strict 相当を想定。
 - リクエスト/レスポンスは Pydantic モデル（または SQLModel）で宣言する。`dict` を直接やり取りしない。
-- ビジネスロジックはルータ関数に書かず `app/services/` に分離する。ルータは入出力変換と呼び出しに専念。
+- ビジネスロジックはルータ関数に書かず `src/mar_api/services/` に分離する。ルータは入出力変換と呼び出しに専念。
 - 依存性注入は FastAPI の `Depends` を使う。グローバル変数で DB セッション等を引き回さない。
 - `print` でデバッグしない。`logging` を使う。本番想定では構造化ログ（JSON出力）に切り替えられる構成にする。
-- 例外は `app/errors.py` 等で定義した独自例外を使い、`HTTPException` への変換は1箇所に集約する。
+- 例外は `src/mar_api/errors.py` 等で定義した独自例外を使い、`HTTPException` への変換は1箇所に集約する。
 
-## SQL / マイグレーション (apps/api)
+## SQL / マイグレーション (python/mar-api)
 
 - スキーマ変更は必ず Alembic マイグレーションを通す。手動で `ALTER TABLE` しない。
 - マイグレーションは `--autogenerate` で生成しつつ、**必ず目視して不要な差分を削る**。自動生成のままコミットしない。
@@ -42,8 +42,8 @@ description: コードを書く・修正するとき（TypeScript / Python / SQL
 ## OpenAPI / 型共有
 
 - API のエンドポイントを追加・変更したら、フロント側で型を再生成する:
-  - `pnpm --filter web gen:api`（コマンド実装後）
-- 生成された型ファイル（`packages/schema/` 配下）は手で編集しない。
+  - `pnpm --filter mar-web gen:api`（コマンド実装後）
+- 生成された型ファイル（`typescript/mar-schema/` 配下）は手で編集しない。
 
 ## ファイル配置の目安
 

@@ -43,7 +43,7 @@ cat <<'EOF'
 Dev Container setup complete.
 
 Next steps:
-  - Start the database:   docker compose up -d db
-  - Initialize Node side: (M2) pnpm init etc.
-  - Initialize Python:    (M2) cd apps/api && uv init
+  - DB (db service) is already running via docker-compose (workspace depends_on db).
+  - Run the API:          uv run --package mar-api uvicorn mar_api.main:app --reload
+  - Smoke test:           curl localhost:8000/healthz
 EOF

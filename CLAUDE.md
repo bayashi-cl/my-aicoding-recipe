@@ -50,19 +50,27 @@ AIコーディングの理想的な開発環境を探る PoC。題材として N
 
 ```
 my-aicoding-recipe/
-├─ apps/{web,api}        # React フロント / FastAPI API
-├─ packages/schema       # 生成型ファイル
-├─ infra/                # AWS CDK
-├─ docs/                 # 要件・設計・journal
-├─ .devcontainer/        # 隔離環境定義
-├─ .vscode/              # 推奨拡張（コミット対象）
-├─ .claude/skills/       # AI 向け規約 SKILL（後述）
-├─ CLAUDE.md             # 本ファイル
-├─ docker-compose.yml    # workspace + db
-└─ mise.toml             # dev ツール宣言
+├─ python/mar-api                                # FastAPI API (uv workspace member)
+├─ typescript/{mar-web,mar-schema,mar-infra}     # React / OpenAPI 型 / AWS CDK (pnpm workspace members)
+├─ docs/                                         # 要件・設計・journal
+├─ .devcontainer/                                # 隔離環境定義
+├─ .vscode/                                      # 推奨拡張（コミット対象）
+├─ .claude/skills/                               # AI 向け規約 SKILL（後述）
+├─ CLAUDE.md                                     # 本ファイル
+├─ docker-compose.yml                            # workspace + db
+├─ mise.toml                                     # dev ツール宣言
+├─ package.json                                  # pnpm workspace ルート
+├─ pnpm-workspace.yaml                           # packages: ["typescript/*"]
+└─ pyproject.toml                                # uv workspace ルート (members = ["python/*"])
 ```
 
-実体が未作成のディレクトリがあるため、作業前に `ls` で確認する。
+**配置・命名規約**:
+
+- workspace member は `python/{pkg}` または `typescript/{pkg}` 配下にのみ置く（ルート側の glob を 1 行で書くため）
+- パッケージ名には `mar-` プレフィックスを付ける (my-aicoding-recipe の略。公開パッケージとの衝突回避)
+- ただし Python モジュール名は uv の生成コマンド (`uv init --lib --package --name mar-api`) に従い `mar_api` のようにアンダースコア化したものを使う
+
+`typescript/mar-web` `typescript/mar-schema` `typescript/mar-infra` は M3 / M5 で実体を作る。作業前に `ls` で実在を確認する。
 
 ---
 
