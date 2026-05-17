@@ -168,17 +168,22 @@ pnpm openapi-typescript http://localhost:8000/openapi.json -o src/types/api.ts
 
 #### 3.2.1 Git worktree による並行作業
 
-複数のClaudeセッションを並行で動かす際、ブランチ単位でworktreeを分ける。
+複数の Claude Code セッションを並行で動かす際、組み込み `--worktree` 機能で worktree を切る。
 
 ```
-my-aicoding-recipe/                 # main worktree
-├─ ../wt-feature-search/            # 検索機能を実装中のworktree
-└─ ../wt-feature-tags/              # タグ機能を実装中のworktree
+my-aicoding-recipe/                 # main worktree (= DevContainer のマウント先、host bind mount)
+$HOME/.claude-worktrees/
+├─ feat-notes-search/                # ブランチ feat/notes-search (overlay FS)
+└─ feat-notes-tags/                  # ブランチ feat/notes-tags  (overlay FS)
 ```
 
-- 各worktreeは独立した Dev Container を立ち上げる（DBは別ポートにマッピング）
-- 「どのworktreeが何を担当しているか」を `WORKTREES.md` でトラッキング
-- worktree作成・破棄を補助するスクリプトを `scripts/worktree.sh` に用意
+- **1 つの DevContainer 内に複数 worktree を持つ**。worktree ごとに DevContainer を立てる構成は採らない (起動時間・キャッシュ重複・ポート/.env の二重管理コストが PoC のメリットを上回るため)
+- **worktree は `$HOME/.claude-worktrees/<name>/` (overlay FS) に置く**。リポジトリは host bind mount で別 FS のため、repo 内に worktree を作ると pnpm/uv の hardlink キャッシュ最適化が壊れて遅くなる。overlay FS 上ならキャッシュ (`~/.cache/pnpm`, `~/.cache/uv` 等) と同 FS なので hardlink が成立
+- worktree 作成は `claude --worktree <type>-<topic>` 形式で呼ぶ。`.claude/hooks/worktree-create.sh` (WorktreeCreate hook) がブランチ名を `<type>/<topic>` に正規化し、`$HOME/.claude-worktrees/<type>-<topic>/` を作る
+- `.env` / `.env.local` は同 hook が新規 worktree に自動コピー (`.worktreeinclude` ではなく hook 内で処理。hook が使われると `.worktreeinclude` は無効化されるため)
+- worktree の場所は overlay FS なので、DevContainer をリビルドすると消える。作業中の worktree はリビルド前にコミット/プッシュしておくこと
+- 並行作業の可視化は `git worktree list` + 関連 Issue/PR で行う (専用のトラッキングファイルは作らない)
+- DB は単一の compose サービスを共有。複数 worktree のアプリを同時起動して両方の動作確認をしたい特殊ケースは、必要が出た時点で別タスクで対処
 
 #### 3.2.2 PR/Issueを引き継ぎ単位にする
 
@@ -375,3 +380,4 @@ typescript/mar-infra/
 - **2026-05-16**: rootless Docker の UID マッピング（コンテナの root = ホストのユーザ）を踏まえ、devcontainer の `remoteUser` を **`root`** に変更。当初の `vscode` だと bind mount したワークスペースが書き込めなかったため
 - **2026-05-17**: workspace member の配置を `apps/` `packages/` `infra/` から **`python/{pkg}` / `typescript/{pkg}`** に統一。同時にパッケージ名へ **`mar-` プレフィックス**を導入（公開パッケージとの簡易的な衝突回避）。意図はルート側からの member 指定を glob 1 行 (`python/*` / `typescript/*`) に収めること。FastAPI 側のモジュール名は uv の生成コマンドに合わせ `mar_api` とした (起動: `uv run --package mar-api uvicorn mar_api.main:app --reload`)
 - **2026-05-17**: プロジェクト Node の `devEngines.runtime` 設定を **M3 → M2 (CI 整備時) に前倒し**。理由は GitHub Actions で `actions/setup-node` を消して pnpm 自身に Node を管理させたかったため。`devEngines.runtime` は宣言的な制約だが pnpm の自動 install を直接トリガしないので、併せて `pnpm.executionEnv.nodeVersion` も `package.json` に追加。CI は `pnpm/action-setup@v4` のみで完結する
+- **2026-05-17**: worktree の運用方針を変更。当初は worktree ごとに DevContainer を立ち上げ、`../wt-<topic>/` (リポジトリ親) に worktree を置く想定だったが、PoC では DevContainer 起動時間・キャッシュ重複・ポート/.env の二重管理コストがメリットを上回ると判断し、**1 つの DevContainer 内に worktree を持つ** 方式に変更。配置場所は Claude Code 組み込み `--worktree` を使いつつ、`$HOME/.claude-worktrees/<name>/` (overlay FS) に置く (リポジトリは host bind mount で別 FS のため、repo 内に worktree を作ると pnpm/uv の hardlink キャッシュが効かない)。命名規約 `<type>/<short-topic>` との整合は `WorktreeCreate` hook (`.claude/hooks/worktree-create.sh`) で取り、`.worktreeinclude` の代わりに `.env` コピーも hook 内で実装 (hook 利用時は include 機能が無効化されるため)。独自シェルスクリプト (当初想定の `scripts/worktree.sh`) は作らない

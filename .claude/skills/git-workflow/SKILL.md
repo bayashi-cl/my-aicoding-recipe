@@ -59,22 +59,21 @@ Issue・PR を扱う前に `gh auth login` を実行する（人間が認証。A
 
 ## Worktree（並行作業時）
 
-複数セッションで並行作業する場合、worktree を使ってブランチごとに独立したディレクトリで作業する。
+複数セッションで並行作業する場合、Claude Code 組み込みの `--worktree` 機能でブランチごとに独立した worktree を作る。
 
 ```bash
-# 例: ../wt-feature-search/ にブランチ feat/notes-search の worktree を作る
-git worktree add ../wt-feature-search -b feat/notes-search
+# 引数は <type>-<topic> 形式。hook がブランチ名を <type>/<topic> に正規化する
+claude --worktree feat-notes-search
+# → $HOME/.claude-worktrees/feat-notes-search/ にセッション、ブランチ feat/notes-search
 ```
 
-- worktree のルートは `../wt-<topic>/` に置く（リポジトリ親ディレクトリ）。
-- worktree 内では Dev Container を別ポートで立てる（DBポートの衝突に注意）。
-- 作業中の worktree は `WORKTREES.md` に追記して可視化する:
-  ```
-  | path | branch | 担当 | 状態 |
-  |------|--------|------|------|
-  | ../wt-feature-search | feat/notes-search | Cloud Agent | 実装中 |
-  ```
-- 作業完了後は `git worktree remove ../wt-<topic>` で片付ける（ブランチは別途マージ判断）。
+- worktree は `$HOME/.claude-worktrees/<name>/` に作られる (overlay FS。pnpm/uv の hardlink を活かすため repo 外に配置)
+- ブランチ名は `WorktreeCreate` hook (`.claude/hooks/worktree-create.sh`) が本 SKILL の命名規約 (`<type>/<short-topic>`) に揃える
+- `.env` / `.env.local` は hook が自動コピーする (gitignored の場合のみ)
+- 並行作業の可視化は `git worktree list` + 関連 Issue/PR で行う (専用トラッキングファイルは作らない)
+- 作業完了時、クリーンな状態なら Claude Code セッション終了で自動削除される。残った場合は `git worktree remove $HOME/.claude-worktrees/<name>` で片付ける
+- **注意**: `$HOME` は overlay FS なので **DevContainer をリビルドすると worktree は消える**。作業中の差分はリビルド前にコミット/プッシュしておく
+- 既存ブランチで worktree を作りたい場合は git 直叩き (`git worktree add $HOME/.claude-worktrees/<name> <existing-branch>` → `cd && claude`)。組み込み機能は新規ブランチ専用
 
 ## Pull Request
 
