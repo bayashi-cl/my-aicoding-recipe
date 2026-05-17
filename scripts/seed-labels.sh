@@ -42,7 +42,6 @@ parse_labels() {
 }
 
 created=0
-updated=0
 while IFS=$'\t' read -r name color desc; do
   [ -z "$name" ] && continue
   if gh label create "$name" --color "$color" --description "$desc" --force >/dev/null 2>&1; then
