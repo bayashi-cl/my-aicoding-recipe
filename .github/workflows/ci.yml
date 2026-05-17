@@ -34,5 +34,6 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: 11
+          standalone: true
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec biome ci .
