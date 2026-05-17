@@ -7,6 +7,15 @@
     "packageManager": {
       "name": "pnpm",
       "version": "^11.1.2"
+    },
+    "runtime": {
+      "name": "node",
+      "version": "^24"
+    }
+  },
+  "pnpm": {
+    "executionEnv": {
+      "nodeVersion": "24.15.0"
     }
   },
   "devDependencies": {
