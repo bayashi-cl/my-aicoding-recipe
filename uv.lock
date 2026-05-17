@@ -5,7 +5,6 @@ requires-python = ">=3.14"
 [manifest]
 members = [
     "mar-api",
-    "my-aicoding-recipe",
 ]
 
 [[package]]
@@ -151,11 +150,6 @@ requires-dist = [
     { name = "sqlmodel", specifier = ">=0.0.38" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.47.0" },
 ]
-
-[[package]]
-name = "my-aicoding-recipe"
-version = "0.1.0"
-source = { virtual = "." }
 
 [[package]]
 name = "psycopg"
