@@ -9,4 +9,4 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    return Settings()
+    return Settings()  # ty: ignore[missing-argument]  # フィールドは env から pydantic-settings が読む

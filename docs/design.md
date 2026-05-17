@@ -70,7 +70,7 @@ my-aicoding-recipe/
 | ORM | SQLModel (or SQLAlchemy 2.0 + Alembic) | Pydanticと統合され型がはっきりする。マイグレーションはAlembic |
 | dev ツール管理 | mise | uv / pnpm / claude-code 等のバイナリ版を `mise.toml` で一元宣言 |
 | Pythonランタイム / パッケージ管理 | uv | Pythonランタイムも含めて uv が取得・管理 |
-| Node ランタイム / パッケージ管理 | pnpm + workspaces | **プロジェクトの Node** は web (`typescript/mar-web`) 追加時 (M3) にルート `package.json` の `devEngines.runtime` で固定し、`pnpm exec` / `pnpm run` 経由で実行する方針。**グローバル CLI 用の Node**（claude-code など）は mise が管理して PATH に出ている（実環境で「Node を完全に PATH から外す」のは Node ベース CLI の実行不能を意味するため。詳細は §8 変更履歴参照） |
+| Node ランタイム / パッケージ管理 | pnpm + workspaces | **プロジェクトの Node** はルート `package.json` の `devEngines.runtime` + `pnpm.executionEnv.nodeVersion` で固定し、`pnpm exec` / `pnpm run` 経由で実行する。**グローバル CLI 用の Node**（claude-code など）は mise が管理して PATH に出ている（実環境で「Node を完全に PATH から外す」のは Node ベース CLI の実行不能を意味するため。詳細は §8 変更履歴参照） |
 | lint / format | Biome | Rust バイナリで Node 不要。TypeScript/JSON 系を一括カバー |
 | IaC | AWS CDK (TypeScript) | 型補完が効きAIも扱いやすい。`typescript/mar-infra/` の devDependency として導入し `pnpm exec cdk` で実行 |
 | 隔離環境 | Dev Container + Docker Compose | 後述（4章） |
@@ -374,3 +374,4 @@ typescript/mar-infra/
 - **2026-05-16**: 上記方針のうち「Node を PATH に置かない」は **実環境で破綻**。mise の npm バックエンドが npm を必要とし、また claude-code は Node.js アプリなので実行時にも Node が要る。`mise.toml` に `node = "lts"` を追加してグローバル用 Node を PATH に出す形に修正。プロジェクト Node を pnpm の `devEngines.runtime` で別管理する原則は維持
 - **2026-05-16**: rootless Docker の UID マッピング（コンテナの root = ホストのユーザ）を踏まえ、devcontainer の `remoteUser` を **`root`** に変更。当初の `vscode` だと bind mount したワークスペースが書き込めなかったため
 - **2026-05-17**: workspace member の配置を `apps/` `packages/` `infra/` から **`python/{pkg}` / `typescript/{pkg}`** に統一。同時にパッケージ名へ **`mar-` プレフィックス**を導入（公開パッケージとの簡易的な衝突回避）。意図はルート側からの member 指定を glob 1 行 (`python/*` / `typescript/*`) に収めること。FastAPI 側のモジュール名は uv の生成コマンドに合わせ `mar_api` とした (起動: `uv run --package mar-api uvicorn mar_api.main:app --reload`)
+- **2026-05-17**: プロジェクト Node の `devEngines.runtime` 設定を **M3 → M2 (CI 整備時) に前倒し**。理由は GitHub Actions で `actions/setup-node` を消して pnpm 自身に Node を管理させたかったため。`devEngines.runtime` は宣言的な制約だが pnpm の自動 install を直接トリガしないので、併せて `pnpm.executionEnv.nodeVersion` も `package.json` に追加。CI は `pnpm/action-setup@v4` のみで完結する
