@@ -33,15 +33,15 @@
 
 - name: "area:api"
   color: "fbca04"
-  description: "apps/api (FastAPI)。"
+  description: "python/mar-api (FastAPI)。"
 
 - name: "area:web"
   color: "fbca04"
-  description: "apps/web (React + Vite)。"
+  description: "typescript/mar-web (React + Vite)。"
 
 - name: "area:infra"
   color: "fbca04"
-  description: "infra/ (AWS CDK)。"
+  description: "typescript/mar-infra (AWS CDK)。"
 
 - name: "area:docs"
   color: "fbca04"

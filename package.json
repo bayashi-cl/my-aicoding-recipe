@@ -1,0 +1,12 @@
+{
+  "name": "my-aicoding-recipe",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.1.2"
+    }
+  }
+}

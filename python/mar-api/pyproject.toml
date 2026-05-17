@@ -1,0 +1,20 @@
+[project]
+name = "mar-api"
+version = "0.1.0"
+description = "Notes アプリの FastAPI サーバ (my-aicoding-recipe の workspace member)"
+readme = "README.md"
+authors = [
+    { name = "Masaki Kobayashi", email = "bayashi.cl@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.136.1",
+    "psycopg[binary]>=3.3.4",
+    "pydantic-settings>=2.14.1",
+    "sqlmodel>=0.0.38",
+    "uvicorn[standard]>=0.47.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.11.14,<0.12.0"]
+build-backend = "uv_build"

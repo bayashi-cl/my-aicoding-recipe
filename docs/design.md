@@ -36,21 +36,27 @@
 
 ```
 my-aicoding-recipe/
-├─ apps/
-│  ├─ web/                # React + Vite フロントエンド（TypeScript）
-│  └─ api/                # FastAPI APIサーバー（Python）
-├─ packages/
-│  └─ schema/             # OpenAPI 由来の型を web 側に生成して共有
-├─ infra/                 # AWS CDK (TypeScript)
-├─ docs/                  # 要件・設計ドキュメント
-├─ .devcontainer/         # Dev Container 定義
-├─ .claude/               # Claude Code 設定・スキル・コマンド
-├─ CLAUDE.md              # AI向けのプロジェクト指示
-├─ docker-compose.yml     # ローカル実行用（workspace + db）
-├─ mise.toml              # dev ツール（uv / pnpm / claude-code）の宣言
-├─ pnpm-workspace.yaml    # web/infra 用
-└─ pyproject.toml         # api 用（uv 管理）
+├─ python/
+│  └─ mar-api/                # FastAPI APIサーバー (uv workspace member)
+├─ typescript/
+│  ├─ mar-web/                # React + Vite フロントエンド (pnpm workspace member, M3)
+│  ├─ mar-schema/             # OpenAPI 由来の型を共有 (pnpm workspace member, M3)
+│  └─ mar-infra/              # AWS CDK (pnpm workspace member, M5)
+├─ docs/                      # 要件・設計ドキュメント
+├─ .devcontainer/             # Dev Container 定義
+├─ .claude/                   # Claude Code 設定・スキル・コマンド
+├─ CLAUDE.md                  # AI向けのプロジェクト指示
+├─ docker-compose.yml         # ローカル実行用（workspace + db）
+├─ mise.toml                  # dev ツール（uv / pnpm / claude-code）の宣言
+├─ pnpm-workspace.yaml        # packages: ["typescript/*"]
+├─ package.json               # pnpm workspace ルート
+└─ pyproject.toml             # uv workspace ルート (members = ["python/*"])
 ```
+
+**配置・命名の規約**:
+
+- workspace member は **`python/{pkg}` / `typescript/{pkg}`** の 2 系統だけに置く。ルート側の glob 指定 (`python/*` / `typescript/*`) を 1 行に収めるため
+- パッケージ名は **`mar-` プレフィックス**を付ける (my-aicoding-recipe の略)。公開パッケージとの名前衝突を簡易的に回避するため
 
 ### 1.2 技術スタック選定理由
 
@@ -64,9 +70,9 @@ my-aicoding-recipe/
 | ORM | SQLModel (or SQLAlchemy 2.0 + Alembic) | Pydanticと統合され型がはっきりする。マイグレーションはAlembic |
 | dev ツール管理 | mise | uv / pnpm / claude-code 等のバイナリ版を `mise.toml` で一元宣言 |
 | Pythonランタイム / パッケージ管理 | uv | Pythonランタイムも含めて uv が取得・管理 |
-| Node ランタイム / パッケージ管理 | pnpm + workspaces | **プロジェクトの Node** は `devEngines.runtime` で固定して `pnpm exec` / `pnpm run` 経由で実行。**グローバル CLI 用の Node**（claude-code など）は mise が管理して PATH に出ている（実環境で「Node を完全に PATH から外す」のは Node ベース CLI の実行不能を意味するため。詳細は §8 変更履歴参照） |
+| Node ランタイム / パッケージ管理 | pnpm + workspaces | **プロジェクトの Node** は web (`typescript/mar-web`) 追加時 (M3) にルート `package.json` の `devEngines.runtime` で固定し、`pnpm exec` / `pnpm run` 経由で実行する方針。**グローバル CLI 用の Node**（claude-code など）は mise が管理して PATH に出ている（実環境で「Node を完全に PATH から外す」のは Node ベース CLI の実行不能を意味するため。詳細は §8 変更履歴参照） |
 | lint / format | Biome | Rust バイナリで Node 不要。TypeScript/JSON 系を一括カバー |
-| IaC | AWS CDK (TypeScript) | 型補完が効きAIも扱いやすい。`infra/` の devDependency として導入し `pnpm exec cdk` で実行 |
+| IaC | AWS CDK (TypeScript) | 型補完が効きAIも扱いやすい。`typescript/mar-infra/` の devDependency として導入し `pnpm exec cdk` で実行 |
 | 隔離環境 | Dev Container + Docker Compose | 後述（4章） |
 
 ---
@@ -76,7 +82,7 @@ my-aicoding-recipe/
 ### 2.1 データモデル
 
 ```python
-# apps/api/app/models/note.py
+# python/mar-api/src/mar_api/models/note.py
 from datetime import datetime
 from uuid import UUID, uuid4
 from sqlmodel import SQLModel, Field
@@ -99,7 +105,7 @@ class Note(SQLModel, table=True):
 フロント側はFastAPIが提供する`/openapi.json`から型を生成する:
 
 ```bash
-# apps/web 側で実行
+# typescript/mar-web 側で実行
 pnpm openapi-typescript http://localhost:8000/openapi.json -o src/types/api.ts
 ```
 
@@ -324,7 +330,7 @@ mise.toml                # uv / pnpm / claude-code を宣言
 ### 5.2 CDK スタック分割
 
 ```
-infra/
+typescript/mar-infra/
 ├─ bin/app.ts
 ├─ lib/
 │  ├─ network-stack.ts       # VPC, Subnet
@@ -367,3 +373,4 @@ infra/
 - **2026-05-16**: dev ツール管理を **mise に統一**。Dockerfile で Node を直接入れる方式から、mise → pnpm の `devEngines.runtime` で Node を取得する方式へ変更。linter/formatter も ESLint+Prettier 想定から **Biome** に変更（別セッションでの調査結果 `tmp/devtool-management.md` を反映）
 - **2026-05-16**: 上記方針のうち「Node を PATH に置かない」は **実環境で破綻**。mise の npm バックエンドが npm を必要とし、また claude-code は Node.js アプリなので実行時にも Node が要る。`mise.toml` に `node = "lts"` を追加してグローバル用 Node を PATH に出す形に修正。プロジェクト Node を pnpm の `devEngines.runtime` で別管理する原則は維持
 - **2026-05-16**: rootless Docker の UID マッピング（コンテナの root = ホストのユーザ）を踏まえ、devcontainer の `remoteUser` を **`root`** に変更。当初の `vscode` だと bind mount したワークスペースが書き込めなかったため
+- **2026-05-17**: workspace member の配置を `apps/` `packages/` `infra/` から **`python/{pkg}` / `typescript/{pkg}`** に統一。同時にパッケージ名へ **`mar-` プレフィックス**を導入（公開パッケージとの簡易的な衝突回避）。意図はルート側からの member 指定を glob 1 行 (`python/*` / `typescript/*`) に収めること。FastAPI 側のモジュール名は uv の生成コマンドに合わせ `mar_api` とした (起動: `uv run --package mar-api uvicorn mar_api.main:app --reload`)

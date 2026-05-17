@@ -20,7 +20,8 @@ AI コーディングの「型」を確立するための PoC。題材として 
 2. コマンドパレット → `Dev Containers: Reopen in Container`
 3. 初回起動時に `.devcontainer/post-create.sh` が走り `mise install` まで終わる
 4. **`gh auth login`** をコンテナ内で実行（人間がやる。AI 側にトークンを渡さない）
-5. DB を起動: `docker compose up -d db`
+5. DB (`db`) は devcontainer の compose で workspace と同時に立ち上がっているため別途起動不要
+6. API を起動する場合: `uv run --package mar-api uvicorn mar_api.main:app --reload` → `curl localhost:8000/health`
 
 エージェント側の作業は VS Code 拡張の Claude Code から実行する。
 
@@ -162,7 +163,7 @@ M2 の進行状況を見て、次に着手すべき Task を提案して。
 エージェントに起票を依頼:
 
 ```
-apps/api/.../foo.py の bar 関数で X というバグがある。
+python/mar-api/src/mar_api/.../foo.py の bar 関数で X というバグがある。
 type:bug ラベルで Issue を起票して。
 緊急度は低い。M2-3 完了後に対応する候補として残す。
 ```
@@ -293,17 +294,18 @@ review-flow SKILL のテンプレに従う。100 行以下。
 
 ```
 my-aicoding-recipe/
-├─ apps/{web,api}        # フロント / API（M2 以降で作る）
-├─ packages/schema       # 生成型ファイル
-├─ infra/                # AWS CDK（M5）
-├─ docs/                 # 要件・設計・ジャーナル
-├─ .devcontainer/        # 隔離環境
-├─ .github/              # Issue/PR テンプレ、ラベル定義
-├─ .claude/skills/       # エージェント向け SKILL（規約）
-├─ scripts/              # 運用補助スクリプト（ラベル seed 等）
-├─ CLAUDE.md             # エージェント向けエントリポイント
-└─ README.md             # 本ファイル（人間向けエントリポイント）
+├─ python/mar-api                                # FastAPI API (M2)
+├─ typescript/{mar-web,mar-schema,mar-infra}     # フロント / 型 / AWS CDK (M3 以降で作る)
+├─ docs/                                         # 要件・設計・ジャーナル
+├─ .devcontainer/                                # 隔離環境
+├─ .github/                                      # Issue/PR テンプレ、ラベル定義
+├─ .claude/skills/                               # エージェント向け SKILL（規約）
+├─ scripts/                                      # 運用補助スクリプト（ラベル seed 等）
+├─ CLAUDE.md                                     # エージェント向けエントリポイント
+└─ README.md                                     # 本ファイル（人間向けエントリポイント）
 ```
+
+workspace member の置き場所は **`python/{pkg}` / `typescript/{pkg}`** の 2 系統に統一し、パッケージ名には **`mar-` プレフィックス**を付ける規約。詳細: [`docs/design.md` §1.1](./docs/design.md)
 
 ## 関連ドキュメント
 
