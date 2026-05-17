@@ -1,0 +1,52 @@
+# GitHub Issue / PR で使うラベル定義。
+# `scripts/seed-labels.sh` がこのファイルを読んで `gh label create` を流す。
+# 既存ラベルとの衝突は --force で上書き。
+#
+# 設計方針:
+#   - type:    Issue の種別 (Milestone / Task / Bug / Chore / Docs)。Milestone と Task の区別はここで取る。
+#   - area:    スコープ (どのディレクトリ・層を触るか)。
+#   - status:  プロセス上の例外状態のみ。通常は GitHub の Open/Closed で十分。
+
+- name: "type:milestone"
+  color: "5319e7"
+  description: "設計書 §6 のマイルストーンを表す親 Issue。"
+
+- name: "type:task"
+  color: "0e8a16"
+  description: "PR 1 件分の作業単位。親 Milestone から派生。"
+
+- name: "type:bug"
+  color: "d73a4a"
+  description: "不具合報告。"
+
+- name: "type:chore"
+  color: "cfd3d7"
+  description: "ビルド・ツール・依存更新等の雑務。"
+
+- name: "type:docs"
+  color: "0075ca"
+  description: "ドキュメント・ジャーナルのみの変更。"
+
+- name: "area:devcontainer"
+  color: "fbca04"
+  description: "Dev Container / Docker Compose / mise 周り。"
+
+- name: "area:api"
+  color: "fbca04"
+  description: "apps/api (FastAPI)。"
+
+- name: "area:web"
+  color: "fbca04"
+  description: "apps/web (React + Vite)。"
+
+- name: "area:infra"
+  color: "fbca04"
+  description: "infra/ (AWS CDK)。"
+
+- name: "area:docs"
+  color: "fbca04"
+  description: "docs/ (要件・設計・ジャーナル)。"
+
+- name: "status:blocked"
+  color: "b60205"
+  description: "外部要因で進行が止まっている。"

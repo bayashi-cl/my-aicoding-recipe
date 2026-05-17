@@ -5,3 +5,6 @@ pnpm = "latest"
 # プロジェクトの Node ランタイム（apps/web）は pnpm の devEngines.runtime で別管理する方針は維持する。
 node = "lts"
 "npm:@anthropic-ai/claude-code" = "latest"
+# GitHub CLI: AI/人間ともに Issue・PR を読み書きするのに必須。
+# 認証 (`gh auth login`) は人間が実施する。AI 側でトークンは扱わない。
+"github:cli/cli" = { version = "latest", exe = "gh" }

@@ -1,0 +1,33 @@
+name: Bug
+description: 不具合の報告。
+title: "bug: <症状>"
+labels: ["type:bug"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: 症状
+      description: 何が起きたか。期待した挙動との差分。
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: 再現手順
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: 環境
+      placeholder: |
+        - OS / Container: <例: Dev Container on WSL2>
+        - 関連コミット: <hash>
+  - type: textarea
+    id: logs
+    attributes:
+      label: ログ / スクリーンショット
