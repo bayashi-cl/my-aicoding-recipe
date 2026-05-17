@@ -1,8 +1,13 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 app = FastAPI(title="mar-api")
 
 
-@app.get("/health")
-def health() -> dict[str, bool]:
-    return {"ok": True}
+class HealthResponse(BaseModel):
+    ok: bool
+
+
+@app.get("/health", response_model=HealthResponse)
+def health() -> HealthResponse:
+    return HealthResponse(ok=True)
