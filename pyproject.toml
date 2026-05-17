@@ -1,2 +1,19 @@
 [tool.uv.workspace]
 members = ["python/*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+extend-exclude = [".venv", "node_modules"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ty.environment]
+root = ["./python"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.13",
+    "ty>=0.0.37",
+]

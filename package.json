@@ -8,5 +8,8 @@
       "name": "pnpm",
       "version": "^11.1.2"
     }
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.15"
   }
 }
