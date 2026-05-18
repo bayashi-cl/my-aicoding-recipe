@@ -8,6 +8,8 @@ node = "lts"
 # GitHub CLI: AI/人間ともに Issue・PR を読み書きするのに必須。
 # 認証 (`gh auth login`) は人間が実施する。AI 側でトークンは扱わない。
 "github:cli/cli" = { version = "latest", exe = "gh" }
+# pgcli: PostgreSQL CLI クライアント（補完・シンタックスハイライト付き）。psql の代替。
+"pipx:pgcli" = "latest"
 
 [tasks."lint:py"]
 description = "ruff check + format check"

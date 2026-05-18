@@ -291,13 +291,25 @@ PR作成
 ├─ post-create.sh        # mise install と疎通確認
 └─ .env.example          # DATABASE_URL 等の雛形
 
-docker-compose.yml       # workspace + db
-mise.toml                # uv / pnpm / claude-code を宣言
+docker-compose.yml       # workspace + db + adminer
+mise.toml                # uv / pnpm / claude-code / pgcli を宣言
 .vscode/extensions.json  # Biome 等の推奨拡張
 .claude/settings.json    # 権限、フック、許可コマンド（追加予定）
 ```
 
-### 4.5 セキュリティ方針
+### 4.5 DB 確認ツール
+
+開発中の DB 状態確認を容易にするため、以下の 2 つのツールを用意する。
+
+| ツール | 種別 | アクセス方法 |
+|--------|------|-------------|
+| `pgcli` | CLI（workspace コンテナ内） | `pgcli postgresql://app:app@db:5432/notes` |
+| Adminer | Web UI（compose サービス） | `http://localhost:8080`（System: PostgreSQL / Server: db / User: app / DB: notes） |
+
+- **pgcli** は `mise.toml` の `"pipx:pgcli" = "latest"` で管理し、dev ツールを mise に一元化する方針（§4.1）と整合させる。
+- **Adminer** は `adminer:5-standalone` イメージを compose サービスとして追加し、`db` サービスと同一ネットワークに配置する。認証・HTTPS 化は PoC スコープ外とする。
+
+### 4.6 セキュリティ方針
 
 - AWS 認証情報: M5 (IaC) で必要になった時点で、ホストの `~/.aws` を読み取り専用マウントする方針
 - `git push --force` 等の破壊的操作は `.claude/settings.json` で要承認
