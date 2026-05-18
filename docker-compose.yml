@@ -30,6 +30,16 @@ services:
       timeout: 3s
       retries: 5
 
+  adminer:
+    image: adminer:5-standalone
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+      ADMINER_DESIGN: nette
+    ports: ["8080:8080"]
+
 volumes:
   pgdata:
   node_modules:
