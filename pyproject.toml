@@ -17,3 +17,6 @@ dev = [
     "ruff>=0.15.13",
     "ty>=0.0.37",
 ]
+
+[tool.alembic]
+script_location = "mar_migrate:"
