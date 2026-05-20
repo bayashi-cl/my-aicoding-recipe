@@ -20,3 +20,15 @@ dev = [
 
 [tool.alembic]
 script_location = "mar_migrate:"
+
+[[tool.alembic.post_write_hooks]]
+name = "ruff-check"
+type = "exec"
+executable = "ruff"
+options = "check --fix REVISION_SCRIPT_FILENAME"
+
+[[tool.alembic.post_write_hooks]]
+name = "ruff-format"
+type = "exec"
+executable = "ruff"
+options = "format REVISION_SCRIPT_FILENAME"
