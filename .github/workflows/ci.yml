@@ -63,3 +63,86 @@ jobs:
           enable-cache: true
       - run: uv sync --group dev --frozen
       - run: uv run pytest python/mar-api/tests_mar_api/ -v
+
+  frontend-check:
+    runs-on: ubuntu-latest
+    env:
+      # /openapi.json は DB に触らないがダミー値が必要 (pydantic-settings)
+      DATABASE_URL: postgresql+psycopg://noop:noop@localhost:5432/noop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+          standalone: true
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: pnpm install --frozen-lockfile
+      - run: uv sync --group dev --frozen
+      - name: Start FastAPI (openapi only)
+        run: |
+          uv run --package mar-api uvicorn mar_api.main:app --port 8000 > /tmp/uvicorn.log 2>&1 &
+          for i in {1..60}; do
+            if curl -fsS http://localhost:8000/openapi.json > /dev/null; then
+              echo "FastAPI ready"; exit 0
+            fi
+            sleep 1
+          done
+          echo "FastAPI did not become ready"; cat /tmp/uvicorn.log; exit 1
+      - run: pnpm --filter mar-schema gen:types
+      - run: pnpm --filter mar-schema exec tsc --noEmit
+      - run: pnpm --filter mar-web exec tsc --noEmit
+
+  frontend-e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: notes
+        options: >-
+          --health-cmd "pg_isready -U app -d notes"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    env:
+      DATABASE_URL: postgresql+psycopg://app:app@localhost:5432/notes
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+          standalone: true
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: pnpm install --frozen-lockfile
+      - run: uv sync --group dev --frozen
+      - run: uv run --package mar-migrate alembic upgrade head
+      - name: Start FastAPI
+        run: |
+          uv run --package mar-api uvicorn mar_api.main:app --port 8000 > /tmp/uvicorn.log 2>&1 &
+          for i in {1..60}; do
+            if curl -fsS http://localhost:8000/openapi.json > /dev/null; then
+              echo "FastAPI ready"; exit 0
+            fi
+            sleep 1
+          done
+          echo "FastAPI did not become ready"; cat /tmp/uvicorn.log; exit 1
+      - run: pnpm --filter mar-schema gen:types
+      - run: pnpm --filter mar-web exec playwright install chromium --with-deps
+      - run: pnpm --filter mar-web test:e2e
+      - name: Upload Playwright artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            typescript/mar-web/test-results/
+            typescript/mar-web/playwright-report/
+          retention-days: 7
