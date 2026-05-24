@@ -58,8 +58,12 @@ function IndexPage() {
   const createMutation = useMutation({
     mutationFn: (data: NoteCreate) => createNote(data),
     onSuccess: (created) => {
+      const wasFiltered = searchQuery !== "" || selectedTag !== null;
       clearFilters();
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({
+        queryKey: ["notes"],
+        refetchType: wasFiltered ? "none" : "active",
+      });
       queryClient.invalidateQueries({ queryKey: ["tags"] });
       setSelectedNoteId(created.id);
       setMode("view");
@@ -70,8 +74,12 @@ function IndexPage() {
     mutationFn: ({ id, data }: { id: string; data: NoteUpdate }) =>
       updateNote(id, data),
     onSuccess: () => {
+      const wasFiltered = searchQuery !== "" || selectedTag !== null;
       clearFilters();
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({
+        queryKey: ["notes"],
+        refetchType: wasFiltered ? "none" : "active",
+      });
       queryClient.invalidateQueries({ queryKey: ["tags"] });
       setMode("view");
     },
