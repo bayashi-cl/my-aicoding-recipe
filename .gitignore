@@ -28,5 +28,8 @@ cdk.out/
 # mise (per-project state, if any)
 .mise.local.toml
 
+# TypeScript generated files
+typescript/mar-schema/src/api.ts
+
 # tmp (作業用、コミット対象外)
 tmp/

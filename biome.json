@@ -1,7 +1,14 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.4.15/schema.json",
   "files": {
-    "includes": ["**/*.json", "**/*.jsonc"],
+    "includes": [
+      "**/*.json",
+      "**/*.jsonc",
+      "**/*.ts",
+      "**/*.tsx",
+      "!**/routeTree.gen.ts",
+      "!typescript/mar-schema/src/api.ts"
+    ],
     "ignoreUnknown": true
   },
   "formatter": {
@@ -9,8 +16,25 @@
     "indentStyle": "space",
     "indentWidth": 2
   },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "trailingCommas": "es5"
+    },
+    "jsxRuntime": "transparent"
+  },
   "linter": {
-    "enabled": true
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "suspicious": {
+        "noExplicitAny": "error"
+      },
+      "style": {
+        "useConst": "error",
+        "noNonNullAssertion": "warn"
+      }
+    }
   },
   "vcs": {
     "enabled": true,

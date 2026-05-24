@@ -1,0 +1,15 @@
+{
+  "name": "mar-schema",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "gen:types": "openapi-typescript http://localhost:8000/openapi.json -o src/api.ts"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.13.0"
+  }
+}
