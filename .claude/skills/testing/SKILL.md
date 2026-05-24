@@ -54,6 +54,7 @@ python/mar-api/
 # tests_mar_api/conftest.py
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import event
 from sqlmodel import Session, SQLModel, create_engine
 
 from mar_api.main import app
@@ -72,17 +73,28 @@ def engine():
 
 @pytest.fixture
 def session(engine):
-    # 外側トランザクションを開き、テスト後に rollback してデータを消す。
-    # サービス層が session.commit() を呼ぶ場合は begin_nested() で savepoint を張ること。
-    # commit() は savepoint を解放するだけで外側トランザクションには影響しないため
-    # 最終的な rollback() で全変更がリセットされる。
+    # 外側トランザクションを開き、その中で SAVEPOINT を張る。サービス層が
+    # session.commit() を呼ぶたびに SAVEPOINT が解放されてしまうため、
+    # after_transaction_end で再度 begin_nested() し、テスト中はずっと
+    # SAVEPOINT 内に居続けるようにする (SQLAlchemy 公式の "Joining a
+    # Session into an External Transaction" パターン)。最終 rollback() で
+    # 全変更がリセットされる。
     connection = engine.connect()
     transaction = connection.begin()
-    with Session(bind=connection) as s:
-        s.begin_nested()
+    s = Session(bind=connection)
+    s.begin_nested()
+
+    @event.listens_for(s, "after_transaction_end")
+    def _restart_savepoint(sess, trans):
+        if trans.nested and not trans._parent.nested:
+            sess.begin_nested()
+
+    try:
         yield s
-    transaction.rollback()
-    connection.close()
+    finally:
+        s.close()
+        transaction.rollback()
+        connection.close()
 
 
 @pytest.fixture

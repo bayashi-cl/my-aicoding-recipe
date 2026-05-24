@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 from mar_api.db import get_session
 from mar_api.main import app
 from mar_api.settings import get_settings
+from sqlalchemy import event
 from sqlalchemy.engine import Engine
 from sqlmodel import Session, SQLModel, create_engine
 
@@ -20,14 +21,26 @@ def engine() -> Generator[Engine]:
 @pytest.fixture
 def session(engine: Engine) -> Generator[Session]:
     # 外側トランザクション + SAVEPOINT で、サービス層の commit() を受けても
-    # 最終 rollback で全変更が消える (testing SKILL の規約)
+    # 最終 rollback で全変更が消える (testing SKILL / SQLAlchemy 公式 "Joining
+    # a Session into an External Transaction" パターン)。
+    # commit() のたびに SAVEPOINT が解放されてしまうため、after_transaction_end
+    # で再 begin_nested し、テスト中はずっと SAVEPOINT 内に居続けるようにする。
     connection = engine.connect()
     transaction = connection.begin()
-    with Session(bind=connection) as s:
-        s.begin_nested()
+    s = Session(bind=connection)
+    s.begin_nested()
+
+    @event.listens_for(s, "after_transaction_end")
+    def _restart_savepoint(sess: Session, trans: object) -> None:
+        if trans.nested and not trans._parent.nested:  # ty: ignore[unresolved-attribute]
+            sess.begin_nested()
+
+    try:
         yield s
-    transaction.rollback()
-    connection.close()
+    finally:
+        s.close()
+        transaction.rollback()
+        connection.close()
 
 
 @pytest.fixture
