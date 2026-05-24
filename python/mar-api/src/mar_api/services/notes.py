@@ -35,7 +35,9 @@ def get_note(session: Session, note_id: UUID) -> Note:
 
 def update_note(session: Session, note_id: UUID, data: NoteUpdate) -> Note:
     note = get_note(session, note_id)
-    for key, value in data.model_dump(exclude_unset=True).items():
+    # exclude_none で explicit null を無視する。NOT NULL カラム (body/tags) に
+    # null を流して 500 になるのを防ぐ。null は「未送信」と同じ扱いとする。
+    for key, value in data.model_dump(exclude_unset=True, exclude_none=True).items():
         setattr(note, key, value)
     note.updated_at = datetime.now(UTC)
     session.add(note)
