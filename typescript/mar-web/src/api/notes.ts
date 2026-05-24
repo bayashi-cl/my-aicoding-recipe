@@ -1,20 +1,16 @@
 import type { components } from "mar-schema";
+import { request } from "./request";
 
 export type NoteRead = components["schemas"]["NoteRead"];
 export type NoteCreate = components["schemas"]["NoteCreate"];
 export type NoteUpdate = components["schemas"]["NoteUpdate"];
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(path, init);
-  if (!res.ok) {
-    throw new Error(`${res.status} ${res.statusText}`);
-  }
-  if (res.status === 204) return undefined as T;
-  return res.json() as Promise<T>;
-}
-
-export function fetchNotes(): Promise<NoteRead[]> {
-  return request<NoteRead[]>("/api/notes");
+export function fetchNotes(q?: string, tag?: string): Promise<NoteRead[]> {
+  const params = new URLSearchParams();
+  if (q) params.set("q", q);
+  if (tag) params.set("tag", tag);
+  const qs = params.size > 0 ? `?${params.toString()}` : "";
+  return request<NoteRead[]>(`/api/notes${qs}`);
 }
 
 export function createNote(data: NoteCreate): Promise<NoteRead> {

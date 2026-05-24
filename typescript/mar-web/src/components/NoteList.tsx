@@ -5,9 +5,26 @@ type Props = {
   selectedId: string | null;
   onSelect: (id: string) => void;
   onNew: () => void;
+  searchQuery: string;
+  onSearchChange: (q: string) => void;
+  tags: string[];
+  selectedTag: string | null;
+  onTagChange: (tag: string | null) => void;
+  filterDisabled?: boolean;
 };
 
-export function NoteList({ notes, selectedId, onSelect, onNew }: Props) {
+export function NoteList({
+  notes,
+  selectedId,
+  onSelect,
+  onNew,
+  searchQuery,
+  onSearchChange,
+  tags,
+  selectedTag,
+  onTagChange,
+  filterDisabled = false,
+}: Props) {
   return (
     <div className="flex flex-col h-full border-r border-gray-200">
       <div className="p-3 border-b border-gray-200">
@@ -18,6 +35,41 @@ export function NoteList({ notes, selectedId, onSelect, onNew }: Props) {
         >
           新規作成
         </button>
+        <div className="mt-2">
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="検索..."
+            aria-label="ノートを検索"
+            disabled={filterDisabled}
+            className={`w-full px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 ${
+              filterDisabled ? "opacity-40 cursor-not-allowed" : ""
+            }`}
+          />
+        </div>
+        {tags.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1">
+            {tags.map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => onTagChange(selectedTag === tag ? null : tag)}
+                disabled={filterDisabled}
+                aria-pressed={selectedTag === tag}
+                className={`px-2 py-0.5 text-xs rounded border ${
+                  filterDisabled
+                    ? "opacity-40 cursor-not-allowed bg-gray-100 text-gray-600 border-gray-200"
+                    : selectedTag === tag
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
+                }`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
       <ul className="flex-1 overflow-y-auto">
         {notes.map((note) => (
