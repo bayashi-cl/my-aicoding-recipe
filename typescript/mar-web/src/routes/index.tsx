@@ -58,7 +58,7 @@ function IndexPage() {
   const createMutation = useMutation({
     mutationFn: (data: NoteCreate) => createNote(data),
     onSuccess: (created) => {
-      const wasFiltered = searchQuery !== "" || selectedTag !== null;
+      const wasFiltered = debouncedQuery !== "" || selectedTag !== null;
       clearFilters();
       queryClient.invalidateQueries({
         queryKey: ["notes"],
@@ -74,7 +74,7 @@ function IndexPage() {
     mutationFn: ({ id, data }: { id: string; data: NoteUpdate }) =>
       updateNote(id, data),
     onSuccess: () => {
-      const wasFiltered = searchQuery !== "" || selectedTag !== null;
+      const wasFiltered = debouncedQuery !== "" || selectedTag !== null;
       clearFilters();
       queryClient.invalidateQueries({
         queryKey: ["notes"],

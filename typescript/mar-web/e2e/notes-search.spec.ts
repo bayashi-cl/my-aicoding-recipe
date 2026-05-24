@@ -29,7 +29,6 @@ test.beforeEach(async ({ request, page }) => {
 
 test("テキスト検索: 入力文字列で絞り込む", async ({ page }) => {
   await page.fill('input[type="search"]', "Python基礎");
-  await page.waitForLoadState("networkidle");
 
   await expect(page.getByRole("button", { name: /Python基礎/ })).toBeVisible();
   await expect(
@@ -40,7 +39,6 @@ test("テキスト検索: 入力文字列で絞り込む", async ({ page }) => {
 
 test("タグフィルター: タグボタンで絞り込む", async ({ page }) => {
   await page.click('button:has-text("web")');
-  await page.waitForLoadState("networkidle");
 
   await expect(
     page.getByRole("button", { name: /JavaScript入門/ })
@@ -51,10 +49,11 @@ test("タグフィルター: タグボタンで絞り込む", async ({ page }) =
 
 test("クリア: 検索クリア後に全件表示", async ({ page }) => {
   await page.fill('input[type="search"]', "Python基礎");
-  await page.waitForLoadState("networkidle");
+  await expect(
+    page.getByRole("button", { name: /JavaScript入門/ })
+  ).toBeHidden();
 
   await page.fill('input[type="search"]', "");
-  await page.waitForLoadState("networkidle");
 
   await expect(page.getByRole("button", { name: /Python基礎/ })).toBeVisible();
   await expect(
@@ -65,14 +64,12 @@ test("クリア: 検索クリア後に全件表示", async ({ page }) => {
 
 test("クリア: タグ再クリックで選択解除して全件表示", async ({ page }) => {
   await page.click('button:has-text("web")');
-  await page.waitForLoadState("networkidle");
-
   await expect(
     page.getByRole("button", { name: /JavaScript入門/ })
   ).toBeVisible();
+  await expect(page.getByRole("button", { name: /Python基礎/ })).toBeHidden();
 
   await page.click('button:has-text("web")');
-  await page.waitForLoadState("networkidle");
 
   await expect(page.getByRole("button", { name: /Python基礎/ })).toBeVisible();
   await expect(
