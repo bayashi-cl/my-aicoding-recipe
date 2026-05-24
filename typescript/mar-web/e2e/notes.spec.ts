@@ -34,17 +34,20 @@ test("CRUD フロー: 作成 → 詳細表示 → 編集 → 削除", async ({ p
   // --- 作成 ---
   await page.click('button:has-text("新規作成")');
   await page.fill('input[placeholder="タイトル"]', "E2Eテストノート");
-  await page.fill('input[placeholder="タグ（カンマ区切り）"]', "e2e, playwright");
+  await page.fill(
+    'input[placeholder="タグ（カンマ区切り）"]',
+    "e2e, playwright"
+  );
   await page.fill(
     "textarea",
-    "# E2E テスト\n\nこれは **Playwright** で作成されたノートです。\n\n- 項目1\n- 項目2",
+    "# E2E テスト\n\nこれは **Playwright** で作成されたノートです。\n\n- 項目1\n- 項目2"
   );
   await page.click('button:has-text("保存")');
   await page.waitForLoadState("networkidle");
 
   // 一覧に追加されていること（リスト内のボタンで確認）
   await expect(
-    page.getByRole("button", { name: /E2Eテストノート/ }),
+    page.getByRole("button", { name: /E2Eテストノート/ })
   ).toBeVisible();
 
   // 詳細ペインにタイトル・タグが表示されていること
@@ -58,18 +61,18 @@ test("CRUD フロー: 作成 → 詳細表示 → 編集 → 削除", async ({ p
   // --- 編集 ---
   await page.click('button:has-text("編集")');
   await expect(page.locator('input[placeholder="タイトル"]')).toHaveValue(
-    "E2Eテストノート",
+    "E2Eテストノート"
   );
   await page.fill('input[placeholder="タイトル"]', "E2Eテストノート（更新済）");
   await page.click('button:has-text("保存")');
   await page.waitForLoadState("networkidle");
 
   await expect(
-    page.locator('h1:has-text("E2Eテストノート（更新済）")'),
+    page.locator('h1:has-text("E2Eテストノート（更新済）")')
   ).toBeVisible();
   // 一覧のタイトルも更新されていること
   await expect(
-    page.getByRole("button", { name: /E2Eテストノート（更新済）/ }),
+    page.getByRole("button", { name: /E2Eテストノート（更新済）/ })
   ).toBeVisible();
 
   // --- 削除 ---

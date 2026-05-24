@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 import type { NoteCreate, NoteRead, NoteUpdate } from "../api/notes";
 
 type Props = {
@@ -12,7 +12,7 @@ export function NoteEditor({ initial, onSave, onCancel }: Props) {
   const [body, setBody] = useState(initial?.body ?? "");
   const [tagsInput, setTagsInput] = useState((initial?.tags ?? []).join(", "));
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const tags = tagsInput
       .split(",")
