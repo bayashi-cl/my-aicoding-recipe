@@ -26,3 +26,9 @@ run = "pnpm exec biome ci ."
 [tasks.check]
 description = "全体チェック (CI と同じセット)"
 depends = ["lint:py", "typecheck:py", "lint:ts"]
+
+[tasks."claude:dangerous"]
+description = "危険: Claude にコードの変更を任せるタスク。内容をよく確認してから実行すること。"
+run = "claude --allow-dangerously-skip-permissions"
+env = { IS_SANDBOX = "1" }
+alias = "ccd"
