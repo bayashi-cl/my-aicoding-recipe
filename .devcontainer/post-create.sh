@@ -12,6 +12,10 @@ mise install
 echo "==> mise list"
 mise list
 
+echo "==> playwright install chromium --with-deps"
+# E2E テスト (typescript/mar-web/e2e/) で使う Chromium とシステム依存ライブラリをインストール
+pnpm --filter mar-web exec playwright install chromium --with-deps
+
 echo "==> tool versions"
 uv --version
 pnpm --version

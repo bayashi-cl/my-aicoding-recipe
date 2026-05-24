@@ -33,3 +33,7 @@ typescript/mar-schema/src/api.ts
 
 # tmp (作業用、コミット対象外)
 tmp/
+
+# Playwright
+test-results/
+playwright-report/
