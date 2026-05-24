@@ -24,7 +24,7 @@ description = "biome ci (lint + format on TS/TSX/JSON)"
 run = "pnpm exec biome ci ."
 
 [tasks."typecheck:ts"]
-description = "tsc --noEmit for TypeScript packages"
+description = "tsc --noEmit for mar-web"
 run = "pnpm --filter mar-web exec tsc --noEmit"
 
 [tasks.check]
