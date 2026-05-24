@@ -9,8 +9,8 @@ jobs:
   python-lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v8
         with:
           enable-cache: true
       - run: uv sync --group dev --frozen
@@ -20,8 +20,8 @@ jobs:
   python-typecheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v8
         with:
           enable-cache: true
       - run: uv sync --group dev --frozen
@@ -30,8 +30,8 @@ jobs:
   typescript-lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
         with:
           version: 11
           standalone: true
@@ -57,8 +57,8 @@ jobs:
     env:
       DATABASE_URL: postgresql+psycopg://app:app@localhost:5432/notes_test
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v8
         with:
           enable-cache: true
       - run: uv sync --group dev --frozen
@@ -70,12 +70,12 @@ jobs:
       # /openapi.json は DB に触らないがダミー値が必要 (pydantic-settings)
       DATABASE_URL: postgresql+psycopg://noop:noop@localhost:5432/noop
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
         with:
           version: 11
           standalone: true
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@v8
         with:
           enable-cache: true
       - run: pnpm install --frozen-lockfile
@@ -113,12 +113,12 @@ jobs:
     env:
       DATABASE_URL: postgresql+psycopg://app:app@localhost:5432/notes
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
         with:
           version: 11
           standalone: true
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@v8
         with:
           enable-cache: true
       - run: pnpm install --frozen-lockfile
@@ -139,7 +139,7 @@ jobs:
       - run: pnpm --filter mar-web test:e2e
       - name: Upload Playwright artifacts
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report
           path: |
