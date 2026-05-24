@@ -104,6 +104,7 @@ function IndexPage() {
           tags={tags}
           selectedTag={selectedTag}
           onTagChange={setSelectedTag}
+          filterDisabled={mode !== "view"}
         />
       </div>
       <div className="flex-1 overflow-hidden">

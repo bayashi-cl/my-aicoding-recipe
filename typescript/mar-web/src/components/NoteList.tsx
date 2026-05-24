@@ -10,6 +10,7 @@ type Props = {
   tags: string[];
   selectedTag: string | null;
   onTagChange: (tag: string | null) => void;
+  filterDisabled?: boolean;
 };
 
 export function NoteList({
@@ -22,6 +23,7 @@ export function NoteList({
   tags,
   selectedTag,
   onTagChange,
+  filterDisabled = false,
 }: Props) {
   return (
     <div className="flex flex-col h-full border-r border-gray-200">
@@ -39,7 +41,11 @@ export function NoteList({
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="検索..."
-            className="w-full px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500"
+            aria-label="ノートを検索"
+            disabled={filterDisabled}
+            className={`w-full px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500 ${
+              filterDisabled ? "opacity-40 cursor-not-allowed" : ""
+            }`}
           />
         </div>
         {tags.length > 0 && (
@@ -49,10 +55,14 @@ export function NoteList({
                 key={tag}
                 type="button"
                 onClick={() => onTagChange(selectedTag === tag ? null : tag)}
+                disabled={filterDisabled}
+                aria-pressed={selectedTag === tag}
                 className={`px-2 py-0.5 text-xs rounded border ${
-                  selectedTag === tag
-                    ? "bg-blue-600 text-white border-blue-600"
-                    : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
+                  filterDisabled
+                    ? "opacity-40 cursor-not-allowed bg-gray-100 text-gray-600 border-gray-200"
+                    : selectedTag === tag
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
                 }`}
               >
                 {tag}
