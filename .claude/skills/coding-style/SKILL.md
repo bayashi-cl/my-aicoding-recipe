@@ -24,6 +24,8 @@ description: コードを書く・修正するとき（TypeScript / Python / SQL
 
 ## Python (python/mar-api)
 
+> テストコードの規約（fixture、DB 接続、実行コマンド）は [`testing`](../testing/SKILL.md) SKILL を参照。
+
 - 型ヒントは常に付ける。`mypy` または `pyright` の strict 相当を想定。
 - リクエスト/レスポンスは Pydantic モデル（または SQLModel）で宣言する。`dict` を直接やり取りしない。
 - ビジネスロジックはルータ関数に書かず `src/mar_api/services/` に分離する。ルータは入出力変換と呼び出しに専念。
