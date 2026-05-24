@@ -2,6 +2,7 @@ import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./e2e",
+  workers: 1,
   use: {
     baseURL: "http://localhost:5173",
     // FastAPI は別途 `uv run --package mar-api uvicorn mar_api.main:app --port 8000` で起動しておく

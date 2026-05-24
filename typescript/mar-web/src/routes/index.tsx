@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   createNote,
   deleteNote,
@@ -9,6 +9,7 @@ import {
   type NoteUpdate,
   updateNote,
 } from "../api/notes";
+import { fetchTags } from "../api/tags";
 import { NoteDetail } from "../components/NoteDetail";
 import { NoteEditor } from "../components/NoteEditor";
 import { NoteList } from "../components/NoteList";
@@ -20,13 +21,31 @@ export const Route = createFileRoute("/")({
 
 type Mode = "view" | "edit" | "new";
 
+function useDebounce(value: string, delay: number): string {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return debounced;
+}
+
 function IndexPage() {
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [mode, setMode] = useState<Mode>("view");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const debouncedQuery = useDebounce(searchQuery, 300);
 
   const { data: notes = [] } = useQuery({
-    queryKey: ["notes"],
-    queryFn: fetchNotes,
+    queryKey: ["notes", debouncedQuery, selectedTag],
+    queryFn: () =>
+      fetchNotes(debouncedQuery || undefined, selectedTag ?? undefined),
+  });
+
+  const { data: tags = [] } = useQuery({
+    queryKey: ["tags"],
+    queryFn: fetchTags,
   });
 
   const selectedNote = notes.find((n) => n.id === selectedNoteId) ?? null;
@@ -80,6 +99,11 @@ function IndexPage() {
             setSelectedNoteId(null);
             setMode("new");
           }}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          tags={tags}
+          selectedTag={selectedTag}
+          onTagChange={setSelectedTag}
         />
       </div>
       <div className="flex-1 overflow-hidden">

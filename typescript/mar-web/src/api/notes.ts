@@ -13,8 +13,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export function fetchNotes(): Promise<NoteRead[]> {
-  return request<NoteRead[]>("/api/notes");
+export function fetchNotes(q?: string, tag?: string): Promise<NoteRead[]> {
+  const params = new URLSearchParams();
+  if (q) params.set("q", q);
+  if (tag) params.set("tag", tag);
+  const qs = params.size > 0 ? `?${params.toString()}` : "";
+  return request<NoteRead[]>(`/api/notes${qs}`);
 }
 
 export function createNote(data: NoteCreate): Promise<NoteRead> {
