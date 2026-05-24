@@ -8,7 +8,7 @@ description: テストを書く・追加するとき (pytest / TypeScript) に�
 ## 基本方針
 
 - **PoC スコープの線引き**: すべてを網羅しない。ハッピーパス（正常系の主要フロー）を最優先にし、テスト工数よりも「動く実証」を取る。
-- **実装とテストは同一 Issue / 同一 PR**: テストを後回しにする別 Issue は作らない（[[feedback_test_split]] 参照）。
+- **実装とテストは同一 Issue / 同一 PR**: テストを後回しにする別 Issue は作らない。機能単位（実装＋テスト）を 1 Issue / 1 PR にまとめる。
 - **型チェックとテストは補完関係**: `ty`（mypy 相当）で型エラーを先に潰してからテストを書く。型で防げる誤りはテストに書かない。
 - **テストを書かないケース**: 設定値の読み取りのみ、純粋な定数定義、自動生成コード（Alembic マイグレーション等）。
 
@@ -39,7 +39,7 @@ python/mar-api/
 
 **実 PostgreSQL を使う。モックは使わない。**
 
-開発環境では `docker-compose.yml` で起動している `db` サービスに接続する。テスト用 DB は本番 DB と同じエンジンを使うことで「動く」保証を得る。テスト DB URL は環境変数 `TEST_DATABASE_URL`（未設定時は `DATABASE_URL` にフォールバック）で切り替える。
+開発環境では `docker-compose.yml` で起動している `db` サービスに接続する。テスト用 DB は本番 DB と同じエンジンを使うことで「動く」保証を得る。接続先は `DATABASE_URL`（`Settings.database_url`）で管理し、テスト実行時は別スキーマや別 DB に向けた URL を環境変数で上書きして切り替える。
 
 ### テスト間のデータ分離
 
@@ -64,8 +64,7 @@ from mar_api.settings import get_settings
 @pytest.fixture(scope="session")
 def engine():
     settings = get_settings()
-    url = getattr(settings, "test_database_url", settings.database_url)
-    eng = create_engine(url)
+    eng = create_engine(settings.database_url)
     SQLModel.metadata.create_all(eng)
     yield eng
     SQLModel.metadata.drop_all(eng)
@@ -73,10 +72,17 @@ def engine():
 
 @pytest.fixture
 def session(engine):
-    with Session(engine) as s:
-        s.begin_nested()   # savepoint でロールバックを安全にする
+    # 外側トランザクションを開き、テスト後に rollback してデータを消す。
+    # サービス層が session.commit() を呼ぶ場合は begin_nested() で savepoint を張ること。
+    # commit() は savepoint を解放するだけで外側トランザクションには影響しないため
+    # 最終的な rollback() で全変更がリセットされる。
+    connection = engine.connect()
+    transaction = connection.begin()
+    with Session(bind=connection) as s:
+        s.begin_nested()
         yield s
-        s.rollback()
+    transaction.rollback()
+    connection.close()
 
 
 @pytest.fixture
@@ -103,12 +109,13 @@ uv run pytest python/mar-api/tests_mar_api/ -v
 # 特定ファイルのみ
 uv run pytest python/mar-api/tests_mar_api/test_notes.py -v
 
-# カバレッジ付き (任意。PoC では省略可)
+# カバレッジ付き (任意。PoC では省略可。事前に pytest-cov を dev 依存に追加すること)
+# uv add --dev pytest-cov  # 初回のみ
 uv run pytest python/mar-api/tests_mar_api/ --cov=mar_api --cov-report=term-missing
 ```
 
 - pytest の設定（`testpaths`、`asyncio_mode` 等）が必要になったら `pyproject.toml` の `[tool.pytest.ini_options]` に追加する。今は設定なしで動かす。
-- CI（GitHub Actions）では同じコマンドを実行する。DB サービスは `services` ブロックで起動する（詳細は CI ワークフローファイル参照）。
+- CI（GitHub Actions）への組み込みは今後追加予定。追加時は PostgreSQL を `services` ブロックで起動し、同じ `uv run pytest` コマンドを実行する。
 
 ## やってはいけないこと
 
