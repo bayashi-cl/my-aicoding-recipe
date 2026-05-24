@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "scripts": {
+    "gen:types": "pnpm --filter mar-schema gen:types"
+  },
   "devEngines": {
     "packageManager": {
       "name": "pnpm",
