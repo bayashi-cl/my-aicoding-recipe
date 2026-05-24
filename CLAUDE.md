@@ -84,6 +84,7 @@ my-aicoding-recipe/
 | [`git-workflow`](./.claude/skills/git-workflow/SKILL.md) | ブランチ作成・worktree 構築・コミット・PR 作成のとき |
 | [`review-flow`](./.claude/skills/review-flow/SKILL.md) | PR 提出前・レビュー対応・マイルストーン完了時（journal 含む） |
 | [`cloud-handoff`](./.claude/skills/cloud-handoff/SKILL.md) | 長時間タスク・調査・並行作業を Cloud Agent / Actions に委譲するとき |
+| [`testing`](./.claude/skills/testing/SKILL.md) | テストを書く・追加するとき（pytest / TypeScript） |
 
 該当 SKILL を読まずに作業を始めない。複数該当する場合は順に確認する。
 
