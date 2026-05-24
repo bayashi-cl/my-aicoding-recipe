@@ -7,7 +7,7 @@
       "**/*.ts",
       "**/*.tsx",
       "!**/routeTree.gen.ts",
-      "!**/api.ts"
+      "!typescript/mar-schema/src/api.ts"
     ],
     "ignoreUnknown": true
   },
