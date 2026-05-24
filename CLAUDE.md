@@ -46,17 +46,66 @@ AIコーディングの理想的な開発環境を探る PoC。題材として N
 
 ---
 
+## 実行環境コンテキスト
+
+Claude Code は **Dev Container の中（`workspace` compose サービス）** で動いている。
+`docker` / `docker-compose` CLI はコンテナ内に存在しないが、PostgreSQL には直接到達できる。
+
+### DB 接続
+
+| 項目 | 値 |
+|------|----|
+| ホスト | `db`（compose サービス名。`localhost` ではない） |
+| 接続 URL | `postgresql://app:app@db:5432/notes` |
+| 環境変数 | `DATABASE_URL` はコンテナ起動時に自動設定済み |
+
+```bash
+# 接続確認
+pgcli "postgresql://app:app@db:5432/notes"
+```
+
+### サーバー起動コマンド
+
+```bash
+# FastAPI（ポート 8000）
+uv run --package mar-api uvicorn mar_api.main:app --port 8000 --reload
+
+# Vite dev server（ポート 5173）
+pnpm --filter mar-web dev
+```
+
+### DB マイグレーション（Alembic）
+
+設定ファイルはリポジトリルートの `alembic.ini`、マイグレーションスクリプトは `python/mar-migrate/` にある。
+
+```bash
+# 最新 head まで適用
+uv run --package mar-migrate alembic upgrade head
+
+# 現在のリビジョン確認
+uv run --package mar-migrate alembic current
+
+# 新規マイグレーション自動生成（モデル変更後）
+uv run --package mar-migrate alembic revision --autogenerate -m "動詞_対象"
+```
+
+> マイグレーションファイル名は `YYYYMMDDHHMM_<verb>_<target>.py` 形式。自動生成後は必ず目視して不要な差分を削ること（`coding-style` SKILL 参照）。
+
+---
+
 ## リポジトリ構成（計画）
 
 ```
 my-aicoding-recipe/
 ├─ python/mar-api                                # FastAPI API (uv workspace member)
+├─ python/mar-migrate                            # Alembic マイグレーション (uv workspace member)
 ├─ typescript/{mar-web,mar-schema,mar-infra}     # React / OpenAPI 型 / AWS CDK (pnpm workspace members)
 ├─ docs/                                         # 要件・設計・journal
 ├─ .devcontainer/                                # 隔離環境定義
 ├─ .vscode/                                      # 推奨拡張（コミット対象）
 ├─ .claude/skills/                               # AI 向け規約 SKILL（後述）
 ├─ CLAUDE.md                                     # 本ファイル
+├─ alembic.ini                                   # Alembic 設定（DB URL は DATABASE_URL 環境変数から取得）
 ├─ docker-compose.yml                            # workspace + db
 ├─ mise.toml                                     # dev ツール宣言
 ├─ package.json                                  # pnpm workspace ルート
