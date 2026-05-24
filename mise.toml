@@ -27,6 +27,10 @@ run = "pnpm exec biome ci ."
 description = "tsc --noEmit for mar-web"
 run = "pnpm --filter mar-web exec tsc --noEmit"
 
+[tasks."gen:types"]
+description = "OpenAPI → TypeScript 型生成 (要: FastAPI サーバ起動済み)"
+run = "pnpm --filter mar-schema gen:types"
+
 [tasks.check]
 description = "全体チェック (CI と同じセット)"
 depends = ["lint:py", "typecheck:py", "lint:ts", "typecheck:ts"]
