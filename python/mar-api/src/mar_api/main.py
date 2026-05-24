@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 from mar_api.errors import NotFoundError
 from mar_api.routers.notes import router as notes_router
+from mar_api.routers.tags import router as tags_router
 
 app = FastAPI(title="mar-api")
 
@@ -18,6 +19,7 @@ def handle_not_found(request: Request, exc: NotFoundError) -> JSONResponse:
 
 
 app.include_router(notes_router)
+app.include_router(tags_router)
 
 
 @app.get("/health", response_model=HealthResponse)

@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 from uuid import UUID
 
+from sqlalchemy import func
 from sqlmodel import Session, select
 
 from mar_api.errors import NotFoundError
@@ -21,9 +22,24 @@ def list_notes(
     q: str | None = None,
     tag: str | None = None,
 ) -> list[Note]:
-    # q / tag は M4 で実装する。本タスクではシグネチャだけ確定させて noop
-    _ = (q, tag)
-    return list(session.exec(select(Note)).all())
+    query = select(Note)
+    if q:
+        # plainto_tsquery は語ごとに AND を取る (=「a b」は a AND b)。
+        # GIN(search_vector) が効くので空白だけの入力でも問題なし。
+        query = query.where(
+            Note.search_vector.op("@@")(func.plainto_tsquery("simple", q))  # ty: ignore[unresolved-attribute]
+        )
+    if tag:
+        query = query.where(Note.tags.op("@>")([tag]))  # ty: ignore[unresolved-attribute]
+    query = query.order_by(Note.created_at.desc())  # ty: ignore[unresolved-attribute]
+    return list(session.exec(query).all())
+
+
+def list_tags(session: Session) -> list[str]:
+    # unnest で text[] を行に展開し distinct + sort。GIN(tags) が無くても
+    # 全件スキャンになるだけで件数が少ない PoC では十分。
+    stmt = select(func.distinct(func.unnest(Note.tags))).order_by(func.unnest(Note.tags))
+    return list(session.exec(stmt).all())
 
 
 def get_note(session: Session, note_id: UUID) -> Note:

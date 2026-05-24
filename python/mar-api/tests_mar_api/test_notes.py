@@ -79,6 +79,68 @@ def test_create_note_validation(client: TestClient) -> None:
     assert res.status_code == 422
 
 
+def test_list_notes_filter_by_q(client: TestClient) -> None:
+    client.post("/api/notes", json={"title": "alpha", "body": "lorem ipsum", "tags": []})
+    client.post("/api/notes", json={"title": "beta", "body": "dolor sit", "tags": []})
+    client.post("/api/notes", json={"title": "gamma", "body": "amet ipsum", "tags": []})
+
+    res = client.get("/api/notes", params={"q": "ipsum"})
+    assert res.status_code == 200
+    titles = sorted(n["title"] for n in res.json())
+    assert titles == ["alpha", "gamma"]
+
+
+def test_list_notes_q_matches_title_and_tags(client: TestClient) -> None:
+    client.post("/api/notes", json={"title": "rust language", "body": "x", "tags": []})
+    client.post("/api/notes", json={"title": "x", "body": "x", "tags": ["rust"]})
+    client.post("/api/notes", json={"title": "x", "body": "x", "tags": ["python"]})
+
+    res = client.get("/api/notes", params={"q": "rust"})
+    assert res.status_code == 200
+    assert len(res.json()) == 2
+
+
+def test_list_notes_q_no_hit_returns_empty(client: TestClient) -> None:
+    client.post("/api/notes", json={"title": "alpha", "body": "lorem", "tags": []})
+
+    res = client.get("/api/notes", params={"q": "nomatch"})
+    assert res.status_code == 200
+    assert res.json() == []
+
+
+def test_list_notes_filter_by_tag(client: TestClient) -> None:
+    client.post("/api/notes", json={"title": "a", "body": "x", "tags": ["work", "urgent"]})
+    client.post("/api/notes", json={"title": "b", "body": "x", "tags": ["work"]})
+    client.post("/api/notes", json={"title": "c", "body": "x", "tags": ["personal"]})
+
+    res = client.get("/api/notes", params={"tag": "work"})
+    assert res.status_code == 200
+    titles = sorted(n["title"] for n in res.json())
+    assert titles == ["a", "b"]
+
+
+def test_list_notes_q_and_tag_are_combined(client: TestClient) -> None:
+    client.post("/api/notes", json={"title": "alpha", "body": "lorem", "tags": ["work"]})
+    client.post("/api/notes", json={"title": "beta", "body": "lorem", "tags": ["personal"]})
+    client.post("/api/notes", json={"title": "gamma", "body": "ipsum", "tags": ["work"]})
+
+    res = client.get("/api/notes", params={"q": "lorem", "tag": "work"})
+    assert res.status_code == 200
+    titles = [n["title"] for n in res.json()]
+    assert titles == ["alpha"]
+
+
+def test_list_notes_ordered_by_created_at_desc(client: TestClient) -> None:
+    # 連続作成で created_at の前後関係が確定する程度の精度はあるという前提
+    client.post("/api/notes", json={"title": "first", "body": "x", "tags": []})
+    client.post("/api/notes", json={"title": "second", "body": "x", "tags": []})
+    client.post("/api/notes", json={"title": "third", "body": "x", "tags": []})
+
+    res = client.get("/api/notes")
+    assert res.status_code == 200
+    assert [n["title"] for n in res.json()] == ["third", "second", "first"]
+
+
 def test_update_note_explicit_null_is_ignored(client: TestClient) -> None:
     # NOT NULL カラムに client が null を送ってきても 500 にせず、
     # 未送信と同じ「変更なし」として扱う
