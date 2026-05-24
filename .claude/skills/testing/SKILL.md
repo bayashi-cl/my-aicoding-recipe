@@ -127,7 +127,7 @@ uv run pytest python/mar-api/tests_mar_api/ --cov=mar_api --cov-report=term-miss
 ```
 
 - pytest の設定（`testpaths`、`asyncio_mode` 等）が必要になったら `pyproject.toml` の `[tool.pytest.ini_options]` に追加する。今は設定なしで動かす。
-- CI（GitHub Actions）への組み込みは今後追加予定。追加時は PostgreSQL を `services` ブロックで起動し、同じ `uv run pytest` コマンドを実行する。
+- CI（GitHub Actions）では `.github/workflows/ci.yml` の `python-test` ジョブで同じコマンドを実行している。PostgreSQL 16 を `services` ブロックで起動し、`DATABASE_URL` を `notes_test` DB に向けている。
 
 ## やってはいけないこと
 

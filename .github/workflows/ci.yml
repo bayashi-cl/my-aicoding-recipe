@@ -37,3 +37,29 @@ jobs:
           standalone: true
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec biome ci .
+
+  python-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: notes_test
+        options: >-
+          --health-cmd "pg_isready -U app -d notes_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    env:
+      DATABASE_URL: postgresql+psycopg://app:app@localhost:5432/notes_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --group dev --frozen
+      - run: uv run pytest python/mar-api/tests_mar_api/ -v
