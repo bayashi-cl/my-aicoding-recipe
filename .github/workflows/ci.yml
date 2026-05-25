@@ -38,6 +38,17 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec biome ci .
 
+  infra-synth:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+          standalone: true
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter mar-infra exec cdk synth --quiet
+
   python-test:
     runs-on: ubuntu-latest
     services:
